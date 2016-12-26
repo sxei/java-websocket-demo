@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>WebSocket Demo</title>
+	<meta charset="utf-8"/>
+	<style type="text/css">
+	.chat-panel{display: none;}
+	#result {
+		width: 500px;
+		height: 500px;
+		background: black;
+		color: white;
+		overflow: auto;
+	}
+	</style>
+</head>
+<body>
+	<div class="login-panel">
+		<input type="text" id="myuid"/>
+		<input type="button" value="登录" onclick="login()"/>
+	</div>
+	<div class="chat-panel">
+		<div id="result">
+		</div>
+		<input type="text" id="sendInput"/>
+		<input type="button" value="发送消息" onclick="send()"/>
+	</div>
+	<script type="text/javascript">
+	var websocket = null;
+	function login()
+	{
+		if(websocket != null) return;
+		var uid = $('#myuid').value;
+		websocket = new WebSocket("ws://localhost:8088/websocket-demo/chat/"+uid); //创建WebSocket对象
+		websocket.onopen = function(e)
+		{
+			console.log('open', e);
+			addLog('登录成功！');
+			$('.login-panel').style.display = 'none';
+			$('.chat-panel').style.display = 'block';
+		};
+		websocket.onclose = function (e)
+		{
+			console.log('close', e);
+		};
+		websocket.onmessage = function (e)
+		{
+			console.log('message', e.data);
+			addLog('收到：'+e.data);
+		};
+		websocket.onerror = function (e)
+		{
+			console.log('error', e);
+		};
+	}
+	var resultObj = $('#result');
+	function addLog(info)
+	{
+		var temp = document.createElement('div');
+		temp.textContent = info;
+		resultObj.appendChild(temp);
+	}
+	function $(selector)
+	{
+		return document.querySelector(selector);
+	}
+	function send()
+	{
+		var text = $('#sendInput').value;
+		websocket.send(text);//向服务器发送消息
+		addLog('发送：'+text);
+	}
+
+</script>
+</html>
